@@ -14,8 +14,8 @@ public class GamePanel extends JPanel implements ActionListener {
     static final int UNIT_SIZE = 25;
     static final int GAME_UNITS = (SCREEN_WIDTH*SCREEN_HEIGHT)/UNIT_SIZE;
     static final int DELAY = 75;
-    final int x[] = new int[GAME_UNITS];
-    final int y[] = new int[GAME_UNITS];
+    final int[] x = new int[GAME_UNITS];
+    final int[] y = new int[GAME_UNITS];
     int bodyParts = 5;
     int applesEaten;
     int appleX;
@@ -94,8 +94,9 @@ public class GamePanel extends JPanel implements ActionListener {
     public void checkCollisions() {
         // if head collides with body
         for(int i = bodyParts;i>0;i--) {
-            if((x[0] == x[i]) && (y[0] == y[i])) {
+            if ((x[0] == x[i]) && (y[0] == y[i])) {
                 running = false;
+                break;
             }
         }
         // touching left border
