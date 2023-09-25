@@ -1,10 +1,16 @@
 package org.example;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.Random;
 import javax.swing.JPanel;
+
+import static javax.imageio.ImageIO.read;
 
 
 public class GamePanel extends JPanel implements ActionListener {
@@ -24,13 +30,27 @@ public class GamePanel extends JPanel implements ActionListener {
     boolean running = false;
     Timer timer;
     Random random;
+    private BufferedImage appleImage, backgroundImage;
 
     GamePanel() {
         random = new Random();
         this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
-        this.setBackground(new Color(0, 110, 54));
+
+        try {
+            backgroundImage = read(new File("src/main/resources/grassBackground.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+//        this.setBackground(new Color(0, 110, 54));
         this.setFocusable(true);
         this.addKeyListener(new MyKeyAdapter());
+
+        try {
+            appleImage = read(new File("src/main/resources/appleImage.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         startGame();
     }
     public void startGame() {
@@ -41,13 +61,18 @@ public class GamePanel extends JPanel implements ActionListener {
     }
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
+        g.drawImage(backgroundImage, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, null);
         draw(g);
+
     }
     public void draw(Graphics g) {
         if (running) {
 
-            g.setColor(new Color(192, 13, 13));
-            g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
+            float visualAppleSize = UNIT_SIZE * 1.5f;
+            float adjustedAppleX = appleX + (UNIT_SIZE - visualAppleSize) / 2;
+            float adjustedAppleY = appleY + (UNIT_SIZE - visualAppleSize) / 2;
+
+            g.drawImage(appleImage, (int) adjustedAppleX, (int)adjustedAppleY,(int)visualAppleSize, (int)visualAppleSize, null);
 
             for (int i = 0; i < bodyParts; i++) {
                 if (i == 0) {
@@ -67,6 +92,7 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
     public void newApple() {
+
         appleX = random.nextInt(SCREEN_WIDTH/UNIT_SIZE)*UNIT_SIZE;
         appleY = random.nextInt(SCREEN_HEIGHT/UNIT_SIZE)*UNIT_SIZE;
     }
@@ -92,26 +118,21 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
     public void checkCollisions() {
-        // if head collides with body
         for(int i = bodyParts;i>0;i--) {
             if ((x[0] == x[i]) && (y[0] == y[i])) {
                 running = false;
                 break;
             }
         }
-        // touching left border
         if(x[0] < 0) {
             running =false;
         }
-        // touching right border
         if(x[0] > SCREEN_WIDTH) {
             running =false;
         }
-        // touching top border
         if(y[0] < 0) {
             running =false;
         }
-        // touching bottom border
         if(y[0] > SCREEN_HEIGHT) {
             running =false;
         }
