@@ -31,12 +31,27 @@ public class GamePanel extends JPanel implements ActionListener {
     Timer timer;
     Random random;
     private BufferedImage appleImage, backgroundImage;
-
+    private BufferedImage snakeHeadUp, snakeHeadDown, snakeHeadLeft, snakeHeadRight;
+    private BufferedImage snakeBodyVertical, snakeBodyHorizontal;
+    private BufferedImage snakeTailUp, snakeTailDown, snakeTailLeft, snakeTailRight;
     GamePanel() {
         random = new Random();
         this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
 
         try {
+            snakeHeadUp = read(new File("src/main/resources/snakeHeadUp.png"));
+            snakeHeadDown = read(new File("src/main/resources/snakeHeadDown.png"));
+            snakeHeadLeft = read(new File("src/main/resources/snakeHeadLeft.png"));
+            snakeHeadRight = read(new File("src/main/resources/snakeHeadRight.png"));
+
+            snakeBodyHorizontal = read(new File("src/main/resources/snakeBody2Horizontal.png"));
+            snakeBodyVertical = read(new File("src/main/resources/snakeBody2Vertical.png"));
+
+            snakeTailUp = read(new File("src/main/resources/snakeTail2Up.png"));
+            snakeTailDown = read(new File("src/main/resources/snakeTail2Down.png"));
+            snakeTailLeft = read(new File("src/main/resources/snakeTail2Left.png"));
+            snakeTailRight = read(new File("src/main/resources/snakeTail2Right.png"));
+
             backgroundImage = read(new File("src/main/resources/grassBackground.png"));
         } catch (IOException e) {
             e.printStackTrace();
@@ -75,13 +90,15 @@ public class GamePanel extends JPanel implements ActionListener {
             g.drawImage(appleImage, (int) adjustedAppleX, (int)adjustedAppleY,(int)visualAppleSize, (int)visualAppleSize, null);
 
             for (int i = 0; i < bodyParts; i++) {
+                BufferedImage currentImage;
                 if (i == 0) {
-                    g.setColor(new Color(88, 46, 1));
-                    g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
+                    currentImage = getSnakeHeadImage();
+                } else if (i ==bodyParts -1) {
+                    currentImage = getSnakeTailImage();
                 } else {
-                    g.setColor(new Color(128, 64, 0));
-                    g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
+                    currentImage = getSnakeBodyImage(i);
                 }
+                g.drawImage(currentImage, x[i], y[i], UNIT_SIZE, UNIT_SIZE, null);
             }
             g.setColor(new Color(192, 13, 13));
             g.setFont(new Font("Arial", Font.BOLD, 20));
@@ -91,6 +108,55 @@ public class GamePanel extends JPanel implements ActionListener {
             gameOver(g);
         }
     }
+
+    private BufferedImage getSnakeHeadImage() {
+        switch (direction) {
+            case 'U' -> {
+                return snakeHeadUp;
+            }
+            case 'D' -> {
+                return snakeHeadDown;
+            }
+            case 'L' -> {
+                return snakeHeadLeft;
+            }
+            case 'R' -> {
+                return snakeHeadRight;
+            }
+            default -> {
+                return snakeHeadRight;
+            }
+        }
+    }
+
+    private BufferedImage getSnakeTailImage() {
+        switch (direction) {
+            case 'U' -> {
+                return snakeTailUp;
+            }
+            case 'D' -> {
+                return snakeTailDown;
+            }
+            case 'L' -> {
+                return snakeTailLeft;
+            }
+            case 'R' -> {
+                return snakeTailRight;
+            }
+            default -> {
+                return snakeTailRight;
+            }
+        }
+    }
+
+    private BufferedImage getSnakeBodyImage(int index) {
+        if (direction == 'L' || direction == 'R') {
+            return snakeBodyHorizontal;
+        } else {
+            return snakeBodyVertical;
+        }
+    }
+
     public void newApple() {
 
         appleX = random.nextInt(SCREEN_WIDTH/UNIT_SIZE)*UNIT_SIZE;
@@ -142,8 +208,9 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
     public void gameOver(Graphics g) {
+        g.setColor(Color.black);
+        g.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-        this.setBackground(Color.black);
         // score over Game over screen
         g.setColor(new Color(192, 13, 13));
         g.setFont(new Font("Arial", Font.BOLD, 50));
