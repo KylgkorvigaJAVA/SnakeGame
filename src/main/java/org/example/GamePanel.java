@@ -1,6 +1,5 @@
 package org.example;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -15,11 +14,11 @@ import static javax.imageio.ImageIO.read;
 
 public class GamePanel extends JPanel implements ActionListener {
 
-    static final int SCREEN_WIDTH = 600;
-    static final int SCREEN_HEIGHT = 600;
-    static final int UNIT_SIZE = 25;
+    static final int SCREEN_WIDTH = 980; //default - 600
+    static final int SCREEN_HEIGHT = 980; //default - 600
+    static final int UNIT_SIZE = 35; //default - 25
     static final int GAME_UNITS = (SCREEN_WIDTH*SCREEN_HEIGHT)/UNIT_SIZE;
-    static final int DELAY = 75;
+    static final int DELAY = 75; //default - 75
     final int[] x = new int[GAME_UNITS];
     final int[] y = new int[GAME_UNITS];
     int bodyParts = 5;
@@ -32,8 +31,10 @@ public class GamePanel extends JPanel implements ActionListener {
     Random random;
     private BufferedImage appleImage, backgroundImage;
     private BufferedImage snakeHeadUp, snakeHeadDown, snakeHeadLeft, snakeHeadRight;
-    private BufferedImage snakeBodyVertical, snakeBodyHorizontal;
+    private BufferedImage snakeBodyImage;
     private BufferedImage snakeTailUp, snakeTailDown, snakeTailLeft, snakeTailRight;
+    BufferedImage currentImage;
+
     GamePanel() {
         random = new Random();
         this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
@@ -44,19 +45,17 @@ public class GamePanel extends JPanel implements ActionListener {
             snakeHeadLeft = read(new File("src/main/resources/snakeHeadLeft.png"));
             snakeHeadRight = read(new File("src/main/resources/snakeHeadRight.png"));
 
-            snakeBodyHorizontal = read(new File("src/main/resources/snakeBody2Horizontal.png"));
-            snakeBodyVertical = read(new File("src/main/resources/snakeBody2Vertical.png"));
+            snakeBodyImage = read(new File("src/main/resources/snakeBody.png"));
 
-            snakeTailUp = read(new File("src/main/resources/snakeTail2Up.png"));
-            snakeTailDown = read(new File("src/main/resources/snakeTail2Down.png"));
-            snakeTailLeft = read(new File("src/main/resources/snakeTail2Left.png"));
-            snakeTailRight = read(new File("src/main/resources/snakeTail2Right.png"));
+            snakeTailUp = read(new File("src/main/resources/snakeTailUp.png"));
+            snakeTailDown = read(new File("src/main/resources/snakeTailDown.png"));
+            snakeTailLeft = read(new File("src/main/resources/snakeTailLeft.png"));
+            snakeTailRight = read(new File("src/main/resources/snakeTailRight.png"));
 
             backgroundImage = read(new File("src/main/resources/grassBackground.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
-//        this.setBackground(new Color(0, 110, 54));
         this.setFocusable(true);
         this.addKeyListener(new MyKeyAdapter());
 
@@ -90,18 +89,31 @@ public class GamePanel extends JPanel implements ActionListener {
             g.drawImage(appleImage, (int) adjustedAppleX, (int)adjustedAppleY,(int)visualAppleSize, (int)visualAppleSize, null);
 
             for (int i = 0; i < bodyParts; i++) {
-                BufferedImage currentImage;
+
                 if (i == 0) {
-                    currentImage = getSnakeHeadImage();
+
+                    int headSize = UNIT_SIZE + 10;
+                    int headX = x[0] -5;
+                    int headY = y[0] -10;
+
+                    switch (direction) {
+                        case 'U' -> g.drawImage(snakeHeadUp, headX, headY, headSize, headSize, null);
+                        case 'D' -> g.drawImage(snakeHeadDown, headX, headY+10, headSize, headSize, null);
+                        case 'L' -> g.drawImage(snakeHeadLeft, headX-5, headY+5, headSize, headSize, null);
+                        case 'R' -> g.drawImage(snakeHeadRight, headX+5, headY+5, headSize, headSize, null);
+                    }
                 } else if (i ==bodyParts -1) {
                     currentImage = getSnakeTailImage();
                 } else {
                     currentImage = getSnakeBodyImage(i);
                 }
-                g.drawImage(currentImage, x[i], y[i], UNIT_SIZE, UNIT_SIZE, null);
+                if (i !=0) {
+                    g.drawImage(currentImage, x[i], y[i], UNIT_SIZE, UNIT_SIZE, null);
+                }
+
             }
             g.setColor(new Color(192, 13, 13));
-            g.setFont(new Font("Arial", Font.BOLD, 20));
+            g.setFont(new Font("Arial", Font.BOLD, 30));
             FontMetrics metrics = getFontMetrics(g.getFont());
             g.drawString("" + applesEaten, (metrics.stringWidth("" + applesEaten))/2, g.getFont().getSize());
         } else {
@@ -109,25 +121,27 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
 
-    private BufferedImage getSnakeHeadImage() {
-        switch (direction) {
-            case 'U' -> {
-                return snakeHeadUp;
-            }
-            case 'D' -> {
-                return snakeHeadDown;
-            }
-            case 'L' -> {
-                return snakeHeadLeft;
-            }
-            case 'R' -> {
-                return snakeHeadRight;
-            }
-            default -> {
-                return snakeHeadRight;
-            }
-        }
-    }
+            // Backup method
+
+//    private BufferedImage getSnakeHeadImage() {
+//        switch (direction) {
+//            case 'U' -> {
+//                return snakeHeadUp;
+//            }
+//            case 'D' -> {
+//                return snakeHeadDown;
+//            }
+//            case 'L' -> {
+//                return snakeHeadLeft;
+//            }
+//            case 'R' -> {
+//                return snakeHeadRight;
+//            }
+//            default -> {
+//                return snakeHeadRight;
+//            }
+//        }
+//    }
 
     private BufferedImage getSnakeTailImage() {
         switch (direction) {
@@ -151,9 +165,9 @@ public class GamePanel extends JPanel implements ActionListener {
 
     private BufferedImage getSnakeBodyImage(int index) {
         if (direction == 'L' || direction == 'R') {
-            return snakeBodyHorizontal;
+            return snakeBodyImage;
         } else {
-            return snakeBodyVertical;
+            return snakeBodyImage;
         }
     }
 
